@@ -8,26 +8,43 @@ class TodoScreen extends StatefulWidget {
 }
 
 class _TodoScreenState extends State<TodoScreen> {
-  final List<String> _todos = [];
+
+  // List of todos: each item contains a title and completion status
+  final List<Map<String, dynamic>> _todos = [];
+
+  // Controller for text input
   final TextEditingController _controller = TextEditingController();
 
+  // Add a new todo item
   void _addTodo() {
     if (_controller.text.isNotEmpty) {
       setState(() {
-        _todos.add(_controller.text);
+        _todos.add({
+          "title": _controller.text,
+          "done": false,
+        });
         _controller.clear();
       });
     }
   }
 
+  // Remove a todo item
   void _removeTodo(int index) {
     setState(() {
       _todos.removeAt(index);
     });
   }
 
+  // Toggle completion status (checkbox)
+  void _toggleTodo(int index) {
+    setState(() {
+      _todos[index]["done"] = !_todos[index]["done"];
+    });
+  }
+
   @override
   void dispose() {
+    // Dispose controller to free memory
     _controller.dispose();
     super.dispose();
   }
@@ -41,7 +58,8 @@ class _TodoScreenState extends State<TodoScreen> {
       ),
       body: Column(
         children: [
-          // input alanı
+
+          // Input section
           Padding(
             padding: const EdgeInsets.all(10),
             child: Row(
@@ -62,13 +80,27 @@ class _TodoScreenState extends State<TodoScreen> {
             ),
           ),
 
-          // liste
+          // Todo list
           Expanded(
             child: ListView.builder(
               itemCount: _todos.length,
               itemBuilder: (context, index) {
+
+                final todo = _todos[index];
+
                 return ListTile(
-                  title: Text(_todos[index]),
+                  leading: Checkbox(
+                    value: todo["done"],
+                    onChanged: (_) => _toggleTodo(index),
+                  ),
+                  title: Text(
+                    todo["title"],
+                    style: TextStyle(
+                      decoration: todo["done"]
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () => _removeTodo(index),
